@@ -9,8 +9,9 @@ License     : BSD3
 module Slick.Pandoc
   ( markdownToHTML
   , markdownToHTML'
+  , orgToHTML
   , markdownToHTMLWithOpts
-  , markdownToHTMLWithOpts' 
+  , markdownToHTMLWithOpts'
   , makePandocReader
   , makePandocReader'
   , makePandocReaderWithMetaWriter
@@ -25,14 +26,14 @@ module Slick.Pandoc
   , flattenMeta
   ) where
 
-import Data.Aeson
-import Development.Shake
-import Text.Pandoc
-import Text.Pandoc.Highlighting
-import Slick.Utils
-import Data.HashMap.Strict as HM
+import           Data.Aeson
+import           Data.HashMap.Strict      as HM
+import           Development.Shake
+import           Slick.Utils
+import           Text.Pandoc
+import           Text.Pandoc.Highlighting
 
-import qualified Data.Text                  as T
+import qualified Data.Text                as T
 
 --------------------------------------------------------------------------------
 
@@ -53,6 +54,9 @@ defaultMarkdownOptions =
        ]
      , githubMarkdownExtensions
      ]
+
+defaultOrgOptions :: ReaderOptions
+defaultOrgOptions = def { readerStandalone = True  }
 
 -- | Reasonable options for rendering to HTML. Includes default code highlighting rules
 defaultHtml5Options :: WriterOptions
@@ -79,6 +83,11 @@ markdownToHTML :: T.Text
 markdownToHTML txt =
     markdownToHTMLWithOpts defaultMarkdownOptions defaultHtml5Options txt
 
+orgToHTML :: T.Text
+               -> Action Value
+orgToHTML txt =
+    orgToHTMLWithOpts defaultOrgOptions defaultHtml5Options txt
+
 -- | Like 'markdownToHTML' but allows returning any JSON serializable object
 markdownToHTML' :: (FromJSON a)
                 => T.Text
@@ -95,6 +104,17 @@ markdownToHTMLWithOpts
 markdownToHTMLWithOpts rops wops txt =
   loadUsing
     (readMarkdown rops)
+    (writeHtml5String wops)
+    txt
+
+orgToHTMLWithOpts
+    :: ReaderOptions  -- ^ Pandoc reader options to specify extensions or other functionality
+    -> WriterOptions  -- ^ Pandoc writer options to modify output
+    -> T.Text         -- ^ Text for conversion
+    -> Action Value
+orgToHTMLWithOpts rops wops txt =
+  loadUsing
+    (readOrg rops)
     (writeHtml5String wops)
     txt
 
@@ -177,7 +197,7 @@ loadUsing reader writer text = do
   withContent <- case meta of
       Object m -> return . Object $ HM.insert "content" (String outText) m
           -- meta & _Object . at "content" ?~ String outText
-      _ -> fail "Failed to parse metadata"
+      _        -> fail "Failed to parse metadata"
   return withContent
 
 -- | Like 'loadUsing' but allows also deserializes the 'Value' into any object

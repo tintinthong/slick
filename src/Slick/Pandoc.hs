@@ -56,13 +56,15 @@ defaultMarkdownOptions =
      ]
 
 defaultOrgOptions :: ReaderOptions
-defaultOrgOptions = def { readerStandalone = True  }
+defaultOrgOptions = def {  readerStandalone = True }
+-- readerExtensions = exts,
+--             where exts = getDefaultExtensions "org"
+
 
 -- | Reasonable options for rendering to HTML. Includes default code highlighting rules
 defaultHtml5Options :: WriterOptions
-defaultHtml5Options =
-  def { writerHighlightStyle = Just tango
-      , writerExtensions     = writerExtensions def
+defaultHtml5Options = def { writerHighlightStyle = Just tango
+ -- , writerExtensions     = writerExtensions def
       }
 
 --------------------------------------------------------------------------------

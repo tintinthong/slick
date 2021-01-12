@@ -195,3 +195,4 @@ If you need to run arbitrary shell commands you can use [`cache`](https://hackag
 Shake has many dependency tracking combinators available; whenever possible you should use the shake variants of these (e.g. `copyFileChanged`, `readFile'`, `writeFile'`, etc.). This will allow shake to detect when and what it needs to rebuild.
 
 Note: You'll likely need to delete `.shake` in your working directory after editing your `Main.hs` file as shake can get confused if rules change without it noticing.
+

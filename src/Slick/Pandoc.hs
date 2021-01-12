@@ -56,16 +56,24 @@ defaultMarkdownOptions =
      ]
 
 defaultOrgOptions :: ReaderOptions
-defaultOrgOptions = def {  readerStandalone = True }
--- readerExtensions = exts,
---             where exts = getDefaultExtensions "org"
+defaultOrgOptions = def { readerExtensions = exts }
+            where
+              exts = mconcat
+                  [
+                  getDefaultExtensions "org"
+                  , extensionsFromList
+                    [
+                      Ext_auto_identifiers
+                    ]
+                  ]
 
 
 -- | Reasonable options for rendering to HTML. Includes default code highlighting rules
 defaultHtml5Options :: WriterOptions
-defaultHtml5Options = def { writerHighlightStyle = Just tango
- -- , writerExtensions     = writerExtensions def
-      }
+defaultHtml5Options = def
+  { writerHighlightStyle = Just tango
+  , writerExtensions     = writerExtensions def
+  }
 
 --------------------------------------------------------------------------------
 
@@ -115,7 +123,7 @@ orgToHTMLWithOpts
     -> T.Text         -- ^ Text for conversion
     -> Action Value
 orgToHTMLWithOpts rops wops txt =
-  loadUsing
+  loadUsing'
     (readOrg rops)
     (writeHtml5String wops)
     txt

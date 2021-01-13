@@ -61,10 +61,10 @@ defaultOrgOptions = def { readerExtensions = exts }
               exts = mconcat
                   [
                   getDefaultExtensions "org"
-                  , extensionsFromList
-                    [
-                      Ext_auto_identifiers
-                    ]
+                  -- , extensionsFromList
+                  --   [
+                  --     Ext_auto_identifiers
+                  --   ]
                   ]
 
 
@@ -162,6 +162,7 @@ makePandocReaderWithMetaWriter
 makePandocReaderWithMetaWriter readerFunc writerFunc text = do
   pdoc@(Pandoc meta _) <- unPandocM $ readerFunc text
   meta' <- flattenMeta writerFunc meta
+  liftIO .  print $ meta
   return (pdoc, meta')
 
 -- | Like 'makePandocReader' but will deserialize the metadata
